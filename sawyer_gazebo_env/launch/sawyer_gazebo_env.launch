@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <arg name="paused" default="true"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <include file="$(find sawyer_gazebo)/launch/sawyer_world.launch">
+    <arg name="electric_gripper" value="true"/>
+
+  </include>
+
+  <param name="camera_description"
+      command="$(find xacro)/xacro --inorder $(find sawyer_gazebo_env)/urdf/camera.urdf.xacro"/>
+
+  <node name="camera_urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+  args="-param camera_description -urdf -model sawyer_top_camera" />
+
+  <node pkg="sawyer_gazebo_env" type="initial_env_setup.py" name="initial_env_setup" />
+
+</launch>

@@ -1,0 +1,11 @@
+<launch>
+
+  <!-- Demonstration Type Argument: {reaching, pick_n_place} -->
+  <arg name="task" default="reaching"/>
+
+  <!-- Run the Sawyer Demonstration -->
+  <node name="demonstrations" pkg="sawyer_demonstration"
+  type="demonstrations.py" args="--task $(arg task)"
+  required="true" output="screen" />
+
+</launch>
