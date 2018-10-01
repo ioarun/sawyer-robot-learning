@@ -9,7 +9,6 @@
 
   <include file="$(find sawyer_gazebo)/launch/sawyer_world.launch">
     <arg name="electric_gripper" value="true"/>
-
   </include>
 
   <param name="camera_description"

@@ -2,12 +2,12 @@
 <robot name="sawyer_top_camera" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 
-  <!-- <link name="world" /> -->
-  
+  <link name="world" />
+
   <xacro:property name="cameraSize" value="0.02" />
   <xacro:property name="cameraMass" value="0.02" />
 
-  <link name="camera">
+<link name="camera">
   <collision>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <geometry>
@@ -26,18 +26,18 @@
   <inertial>
         <mass value="0.001" />
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
-      </inertial>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+  </inertial>
 </link>
 
 <joint name="camera_joint" type="fixed">
     <parent link="world" />
     <child link = "camera" />
-    <origin xyz="0.7 0.0 0.5" rpy="0.0 1.57 0.0" />
+    <origin xyz="0.7 0.0 1.2" rpy="0.0 1.57 0.0" />
   </joint>
 
   <gazebo reference="camera">
-  <material>Gazebo/Grey</material>
+  <material>Gazebo/Blue</material>
   <sensor type="camera" name="camera1">
     <update_rate>30.0</update_rate>
     <camera name="head">
