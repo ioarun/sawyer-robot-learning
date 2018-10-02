@@ -1,5 +1,14 @@
 <launch>
 
+  <!-- Joystick Device Argument-->
+  <arg name="dev" default="/dev/input/js0" />
+
+  <!-- Start the Joy Node -->
+  <node name="joy_node" pkg="joy"
+  type="joy_node" required="true" output="screen">
+    <param name="dev" type="string" value="$(arg dev)" />
+  </node>
+
   <!-- Demonstration Type Argument: {reaching, pick_n_place} -->
   <arg name="task" default="reaching"/>
 

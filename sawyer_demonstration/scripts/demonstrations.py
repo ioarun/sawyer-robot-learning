@@ -21,6 +21,7 @@ from geometry_msgs.msg import (
     Point,
     Quaternion,
 )
+from intera_core_msgs.msg import EndpointState
 from intera_examples import JointRecorder
 
 from intera_interface import CHECK_VERSION
@@ -34,6 +35,7 @@ from copy import deepcopy
 import numpy as np
 
 import random
+from joystick import CustomController
 
 rospy.init_node('demonstrator_node')
 
@@ -109,24 +111,35 @@ def ping_from_the_recorder_start_cb(data):
 def ping_from_the_recorder_stop_cb(data):
     print "recorder pings :", data
 
+def EndpointStateCb(data):
+    joystick._controls['leftStickHorz'] = msg.axes[0]
+    joystick._controls['leftStickVert'] = msg.axes[1]
+    point.x = data.pose.position.x + joystick._controls['leftStickHorz']
+    point.y = data.pose.position.y + joystick._controls['leftStickVert']
+
+joystick = CustomController()
+
 def main():
+    rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, EndpointStateCb)
+
     random.seed(1)
-    # move_to_neutral()
     while not rospy.is_shutdown():
-        move_to_neutral()
-        x = (random.uniform(0.5, 0.7))
-        y = (random.uniform(-0.4, 0.4))
-        point.x = x
-        point.y = y
+        # move_to_neutral()
+        # x = (random.uniform(0.5, 0.7))
+        # y = (random.uniform(-0.4, 0.4))
+        # point.x = x
+        # point.y = y
         point.z = 0.05
-        spawn_cube(x, y)
-        if limb.ik_request(pose) != False:
-            demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
-            limb.move_to_joint_positions(limb.ik_request(pose))
-            demonstrator_publisher_stop.publish('stop')     
-        else:
-            print "IK Request failed."
-        delete_gazebo_models()
+        # spawn_cube(x, y)
+        print point.x
+        print point.y
+        # if limb.ik_request(pose) != False:
+        #     demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
+        #     limb.move_to_joint_positions(limb.ik_request(pose))
+        #     demonstrator_publisher_stop.publish('stop')     
+        # else:
+        #     print "IK Request failed."
+        # delete_gazebo_models()
     
 
 if __name__ == '__main__':
