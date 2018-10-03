@@ -181,7 +181,6 @@ class CustomController(Joystick):
         Args:
               msg(Joy): a joystick input message
         """
-        print msg
         self._controls['btnLeft'] = (msg.buttons[0] == 1)
         self._controls['btnUp'] = (msg.buttons[2] == 1)
         self._controls['btnDown'] = (msg.buttons[1] == 1)
