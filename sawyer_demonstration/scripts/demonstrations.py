@@ -67,6 +67,16 @@ current_x = 0.0
 current_y = 0.0
 current_z = 0.0
 
+reset = False
+
+def reset():
+    delete_gazebo_models()
+    x = (random.uniform(0.5, 0.7))
+    y = (random.uniform(-0.4, 0.4))
+    spawn_cube(x, y)
+    reset = True
+
+
 def spawn_cube(_x, _y, block_reference_frame="world"):
     print _x, _y
     # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
@@ -121,35 +131,51 @@ def EndpointStateCb(data):
     current_z = data.pose.position.z
 
 joystick = CustomController()
+gripper = intera_interface.Gripper()
 
 def main():
     rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, EndpointStateCb)
 
     random.seed(1)
     move_to_neutral()
+    gripper_open = False
+    x = (random.uniform(0.5, 0.7))
+    y = (random.uniform(-0.4, 0.4))
+    spawn_cube(x, y)
     while not rospy.is_shutdown():
         # move_to_neutral()
-        x = (random.uniform(0.5, 0.7))
-        y = (random.uniform(-0.4, 0.4))
         # point.x = x
         # point.y = y
         # point.z = 0.05
         # spawn_cube(x, y)
+
         if len(joystick._controls) > 0:
+            # if leftBumper button is clicked : Open the gripper.
+            if joystick._controls['leftBumper'] and (not gripper_open):
+                gripper.open()
+                gripper_open = True
+            elif joystick._controls['leftBumper'] and gripper_open:
+                gripper.close()
+                gripper_open = False
+
+            print joystick._controls['rightBumper']
+            if joystick._controls['rightBumper'] and (not reset):
+                reset()
+                print "reset"
 
             if joystick._controls['leftStickHorz'] < 0.0:
                 point.x += 0.01
-                print "right"
+                # print "right"
             elif joystick._controls['leftStickHorz'] > 0.0:
                 point.x -= 0.01
-                print "left"
+                # print "left"
 
             if joystick._controls['leftStickVert'] < 0.0:
                 point.y -= 0.01
-                print "down"
+                # print "down"
             elif joystick._controls['leftStickVert'] > 0.0:
                 point.y += 0.01
-                print "up"
+                # print "up"
 
             if joystick._controls['rightStickVert'] > 0.0:
                 point.z += 0.01
