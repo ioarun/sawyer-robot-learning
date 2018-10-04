@@ -57,9 +57,9 @@ def main():
 
     rospy.init_node("initial_env_setup")
 
-    # load_gazebo_models()
+    load_gazebo_models()
     # Remove models from the scene on shutdown
-    # rospy.on_shutdown(delete_gazebo_models)
+    rospy.on_shutdown(delete_gazebo_models)
 
 
 if __name__ == '__main__':

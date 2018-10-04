@@ -63,6 +63,20 @@ q.w = 0.00031241683589
 pose.position = point
 pose.orientation = q
 
+current_x = 0.0
+current_y = 0.0
+current_z = 0.0
+
+reset = False
+
+def reset():
+    delete_gazebo_models()
+    x = (random.uniform(0.5, 0.7))
+    y = (random.uniform(-0.4, 0.4))
+    spawn_cube(x, y)
+    reset = True
+
+
 def spawn_cube(_x, _y, block_reference_frame="world"):
     print _x, _y
     # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
@@ -112,33 +126,68 @@ def ping_from_the_recorder_stop_cb(data):
     print "recorder pings :", data
 
 def EndpointStateCb(data):
-    joystick._controls['leftStickHorz'] = msg.axes[0]
-    joystick._controls['leftStickVert'] = msg.axes[1]
-    point.x = data.pose.position.x + joystick._controls['leftStickHorz']
-    point.y = data.pose.position.y + joystick._controls['leftStickVert']
+    current_x = data.pose.position.x
+    current_y = data.pose.position.y
+    current_z = data.pose.position.z
 
 joystick = CustomController()
+gripper = intera_interface.Gripper()
 
 def main():
     rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, EndpointStateCb)
 
     random.seed(1)
+    move_to_neutral()
+    gripper_open = False
+    x = (random.uniform(0.5, 0.7))
+    y = (random.uniform(-0.4, 0.4))
+    spawn_cube(x, y)
     while not rospy.is_shutdown():
         # move_to_neutral()
-        # x = (random.uniform(0.5, 0.7))
-        # y = (random.uniform(-0.4, 0.4))
         # point.x = x
         # point.y = y
-        point.z = 0.05
+        # point.z = 0.05
         # spawn_cube(x, y)
-        print point.x
-        print point.y
-        # if limb.ik_request(pose) != False:
-        #     demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
-        #     limb.move_to_joint_positions(limb.ik_request(pose))
-        #     demonstrator_publisher_stop.publish('stop')     
-        # else:
-        #     print "IK Request failed."
+
+        if len(joystick._controls) > 0:
+            # if leftBumper button is clicked : Open the gripper.
+            if joystick._controls['leftBumper'] and (not gripper_open):
+                gripper.open()
+                gripper_open = True
+            elif joystick._controls['leftBumper'] and gripper_open:
+                gripper.close()
+                gripper_open = False
+
+            print joystick._controls['rightBumper']
+            if joystick._controls['rightBumper'] and (not reset):
+                reset()
+                print "reset"
+
+            if joystick._controls['leftStickHorz'] < 0.0:
+                point.x += 0.01
+                # print "right"
+            elif joystick._controls['leftStickHorz'] > 0.0:
+                point.x -= 0.01
+                # print "left"
+
+            if joystick._controls['leftStickVert'] < 0.0:
+                point.y -= 0.01
+                # print "down"
+            elif joystick._controls['leftStickVert'] > 0.0:
+                point.y += 0.01
+                # print "up"
+
+            if joystick._controls['rightStickVert'] > 0.0:
+                point.z += 0.01
+            elif joystick._controls['rightStickVert'] < 0.0:
+                point.z -= 0.01
+
+            if limb.ik_request(pose) != False:
+                demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
+                limb.move_to_joint_positions(limb.ik_request(pose))
+                demonstrator_publisher_stop.publish('stop')     
+            else:
+                print "IK Request failed."
         # delete_gazebo_models()
     
 
