@@ -17,6 +17,6 @@
   <node name="camera_urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
   args="-param camera_description -urdf -model sawyer_top_camera" />
 
-  <node pkg="sawyer_gazebo_env" type="initial_env_setup.py" name="initial_env_setup"/>
+  <!-- <node pkg="sawyer_gazebo_env" type="initial_env_setup.py" name="initial_env_setup"/> -->
 
 </launch>
