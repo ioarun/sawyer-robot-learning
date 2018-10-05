@@ -22,7 +22,6 @@ from geometry_msgs.msg import (
     Quaternion,
 )
 from intera_core_msgs.msg import EndpointState
-from intera_examples import JointRecorder
 
 from intera_interface import CHECK_VERSION
 
@@ -54,6 +53,7 @@ from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
 point = Point()
 
+# End effector orientation is fixed.
 q = Quaternion()
 q.x = 0.642161760993
 q.y = 0.766569045326
@@ -77,8 +77,24 @@ def reset():
     reset = True
 
 
+def spawn_table(table_pose=Pose(position=Point(x=0.75, y=0.0, z=0.0)),table_reference_frame="world"):
+    # Get Models' Path
+    model_path = rospkg.RosPack().get_path('sawyer_sim_examples')+"/models/"
+    # Load Table SDF
+    table_xml = ''
+    with open (model_path + "cafe_table/model.sdf", "r") as table_file:
+        table_xml=table_file.read().replace('\n', '')
+    # Spawn Table SDF
+    rospy.wait_for_service('/gazebo/spawn_sdf_model')
+    try:
+        spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
+        resp_sdf = spawn_sdf("cafe_table", table_xml, "/",
+                             table_pose, table_reference_frame)
+    except rospy.ServiceException, e:
+        rospy.logerr("Spawn SDF service call failed: {0}".format(e))
+
+
 def spawn_cube(_x, _y, block_reference_frame="world"):
-    print _x, _y
     # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
     block_pose=Pose(position=Point(x=_x, y=_y, z=0.7725))
     # Get Models' Path
@@ -98,11 +114,14 @@ def spawn_cube(_x, _y, block_reference_frame="world"):
     except rospy.ServiceException, e:
         rospy.logerr("Spawn URDF service call failed: {0}".format(e))
 
-def delete_gazebo_models():
-    # This will be called on ROS Exit, deleting Gazebo models
-    # Do not wait for the Gazebo Delete Model service, since
-    # Gazebo should already be running. If the service is not
-    # available since Gazebo has been killed, it is fine to error out
+def delete_table():
+    try:
+        delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+        resp_delete = delete_model("cafe_table")
+    except rospy.ServiceException, e:
+        print("Delete Model service call failed: {0}".format(e))
+
+def delete_cube():
     try:
         delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
         resp_delete = delete_model("block")
@@ -135,60 +154,64 @@ gripper = intera_interface.Gripper()
 
 def main():
     rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, EndpointStateCb)
-
     random.seed(1)
-    move_to_neutral()
     gripper_open = False
-    x = (random.uniform(0.5, 0.7))
-    y = (random.uniform(-0.4, 0.4))
-    spawn_cube(x, y)
+    # spawn_cube(x, y)
+    # move_to_neutral()
+    spawn_table()
+    rospy.on_shutdown(delete_table)
+    rospy.on_shutdown(delete_cube)
+
     while not rospy.is_shutdown():
-        # move_to_neutral()
-        # point.x = x
-        # point.y = y
-        # point.z = 0.05
-        # spawn_cube(x, y)
+        move_to_neutral()
+        x = (random.uniform(0.5, 0.7))
+        y = (random.uniform(-0.4, 0.4))
+        point.x = x
+        point.y = y
+        point.z = 0.05
+        spawn_cube(x, y)
 
-        if len(joystick._controls) > 0:
+        # if len(joystick._controls) > 0:
             # if leftBumper button is clicked : Open the gripper.
-            if joystick._controls['leftBumper'] and (not gripper_open):
-                gripper.open()
-                gripper_open = True
-            elif joystick._controls['leftBumper'] and gripper_open:
-                gripper.close()
-                gripper_open = False
+            # if joystick._controls['leftBumper'] and (not gripper_open):
+            #     gripper.open()
+            #     gripper_open = True
+            # elif joystick._controls['leftBumper'] and gripper_open:
+            #     gripper.close()
+            #     gripper_open = False
 
-            print joystick._controls['rightBumper']
-            if joystick._controls['rightBumper'] and (not reset):
-                reset()
-                print "reset"
+            # if joystick._controls['rightBumper']:
+            #     # reset()
+            #     move_to_neutral()
+            #     print "reset"
 
-            if joystick._controls['leftStickHorz'] < 0.0:
-                point.x += 0.01
-                # print "right"
-            elif joystick._controls['leftStickHorz'] > 0.0:
-                point.x -= 0.01
-                # print "left"
+            # if joystick._controls['leftStickHorz'] < 0.0:
+            #     point.x += 0.01
+            #     # print "right"
+            # elif joystick._controls['leftStickHorz'] > 0.0:
+            #     point.x -= 0.01
+            #     # print "left"
 
-            if joystick._controls['leftStickVert'] < 0.0:
-                point.y -= 0.01
-                # print "down"
-            elif joystick._controls['leftStickVert'] > 0.0:
-                point.y += 0.01
-                # print "up"
+            # if joystick._controls['leftStickVert'] < 0.0:
+            #     point.y -= 0.01
+            #     # print "down"
+            # elif joystick._controls['leftStickVert'] > 0.0:
+            #     point.y += 0.01
+            #     # print "up"
 
-            if joystick._controls['rightStickVert'] > 0.0:
-                point.z += 0.01
-            elif joystick._controls['rightStickVert'] < 0.0:
-                point.z -= 0.01
+            # if joystick._controls['rightStickVert'] > 0.0:
+            #     point.z += 0.01
+            # elif joystick._controls['rightStickVert'] < 0.0:
+            #     point.z -= 0.01
 
-            if limb.ik_request(pose) != False:
-                demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
-                limb.move_to_joint_positions(limb.ik_request(pose))
-                demonstrator_publisher_stop.publish('stop')     
-            else:
-                print "IK Request failed."
-        # delete_gazebo_models()
+        if limb.ik_request(pose) != False:
+            demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
+            limb.move_to_joint_positions(limb.ik_request(pose))
+            demonstrator_publisher_stop.publish('stop')     
+        else:
+            print "IK Request failed."
+        
+        delete_cube()
     
 
 if __name__ == '__main__':
