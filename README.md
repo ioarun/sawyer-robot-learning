@@ -8,7 +8,7 @@ Simulation source code and examples for applying machine learning algorithms on 
 - Python 3.6
 
 <p align= "center">
-  <img src="sawyer_gazebo_env/sawyer.png/" height="500" width="700">
+  <img src="sawyer_gazebo_env/sawyer_pick&place.png/">
 </p>
 
 ## File setup:
