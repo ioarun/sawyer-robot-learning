@@ -10,6 +10,7 @@ import intera_interface
 import rospkg
 
 from std_msgs.msg import String
+from std_msgs.msg import Bool
 
 from gazebo_msgs.srv import (
     SpawnModel,
@@ -35,16 +36,16 @@ import numpy as np
 
 import random
 from joystick import CustomController
+# from recorder import JointRecorder
 
 rospy.init_node('demonstrator_node')
 
-demonstrator_publisher_start = rospy.Publisher('/demonstrator/message/start', String, queue_size=10)
-demonstrator_publisher_stop = rospy.Publisher('/demonstrator/message/stop', String, queue_size=10)
-
+demonstrator_publisher = rospy.Publisher('/demonstrator/message/start', Bool, queue_size=10)
 # recorder_subscriber_start = rospy.Subscriber('/recorder/message/start', String, ping_from_the_recorder_start_cb)
 # recorder_subscriber_stop = rospy.Subscriber('/recorder/message/stop', String, ping_from_the_recorder_stop_cb)
 
 flag = False
+start_recording = False
 
 limb = intera_interface.Limb('right')
 from geometry_msgs.msg import Pose
@@ -149,19 +150,26 @@ def EndpointStateCb(data):
     current_y = data.pose.position.y
     current_z = data.pose.position.z
 
+def recorder_cb(msg):
+    data = msg.data
+    start_recording = data
+
+
 joystick = CustomController()
 gripper = intera_interface.Gripper()
+start_demo = False
 
 def main():
     rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, EndpointStateCb)
+    rospy.Subscriber('/recorder/message/start', Bool, recorder_cb)
+
     random.seed(1)
     gripper_open = False
     # spawn_cube(x, y)
-    # move_to_neutral()
+    move_to_neutral()
     spawn_table()
     rospy.on_shutdown(delete_table)
     rospy.on_shutdown(delete_cube)
-
     while not rospy.is_shutdown():
         move_to_neutral()
         x = (random.uniform(0.5, 0.7))
@@ -172,42 +180,56 @@ def main():
         spawn_cube(x, y)
 
         # if len(joystick._controls) > 0:
-            # if leftBumper button is clicked : Open the gripper.
-            # if joystick._controls['leftBumper'] and (not gripper_open):
-            #     gripper.open()
-            #     gripper_open = True
-            # elif joystick._controls['leftBumper'] and gripper_open:
-            #     gripper.close()
-            #     gripper_open = False
+        #     # if leftBumper button is clicked : Open the gripper.
+        #     if joystick._controls['leftBumper'] and (not gripper_open):
+        #         gripper.open()
+        #         gripper_open = True
+        #     elif joystick._controls['leftBumper'] and gripper_open:
+        #         gripper.close()
+        #         gripper_open = False
 
-            # if joystick._controls['rightBumper']:
-            #     # reset()
-            #     move_to_neutral()
-            #     print "reset"
+        #     if joystick._controls['rightBumper']:
+        #         # reset()
+        #         move_to_neutral()
+        #         print "reset"
 
-            # if joystick._controls['leftStickHorz'] < 0.0:
-            #     point.x += 0.01
-            #     # print "right"
-            # elif joystick._controls['leftStickHorz'] > 0.0:
-            #     point.x -= 0.01
-            #     # print "left"
+        #     if joystick._controls['leftStickHorz'] < 0.0:
+        #         point.x += 0.01
+        #         # print "right"
+        #     elif joystick._controls['leftStickHorz'] > 0.0:
+        #         point.x -= 0.01
+        #         # print "left"
 
-            # if joystick._controls['leftStickVert'] < 0.0:
-            #     point.y -= 0.01
-            #     # print "down"
-            # elif joystick._controls['leftStickVert'] > 0.0:
-            #     point.y += 0.01
-            #     # print "up"
+        #     if joystick._controls['leftStickVert'] < 0.0:
+        #         point.y -= 0.01
+        #         # print "down"
+        #     elif joystick._controls['leftStickVert'] > 0.0:
+        #         point.y += 0.01
+        #         # print "up"
 
-            # if joystick._controls['rightStickVert'] > 0.0:
-            #     point.z += 0.01
-            # elif joystick._controls['rightStickVert'] < 0.0:
-            #     point.z -= 0.01
+        #     if joystick._controls['rightStickVert'] > 0.0:
+        #         point.z += 0.01
+        #     elif joystick._controls['rightStickVert'] < 0.0:
+        #         point.z -= 0.01
+
+        # start recording 
+        # if not already recording
+        # if not start_recording:
+        #     demonstrator_publisher.publish("True")
+        # else:
+        #     demonstrator_publisher.publish("False")
+        
 
         if limb.ik_request(pose) != False:
-            demonstrator_publisher_start.publish(str(datetime.datetime.time(datetime.datetime.now())))
+            bool_data = Bool()
+            bool_data.data = True
+            demonstrator_publisher.publish(bool_data)
             limb.move_to_joint_positions(limb.ik_request(pose))
-            demonstrator_publisher_stop.publish('stop')     
+            bool_data.data = False  
+            # inform the recorder that demonstration
+            # is completed.
+            demonstrator_publisher.publish(bool_data) 
+            start_recording = False  
         else:
             print "IK Request failed."
         
