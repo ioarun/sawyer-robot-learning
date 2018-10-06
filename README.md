@@ -12,7 +12,7 @@ Simulation source code and examples for applying machine learning algorithms on 
 </p>
 
 ## File setup:
-Clone the repository into the sawyer workspace and then cd to catkin_ws directory  
+Clone the repository into the sawyer file(with the previously installed sawyer simulator and sdk's) and then cd to catkin_ws directory  
 ```
 $ cd catkin_ws
 $ catkin_make
