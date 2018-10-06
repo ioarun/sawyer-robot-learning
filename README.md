@@ -10,3 +10,10 @@ Simulation source code and examples for applying machine learning algorithms on 
 <p align= "center">
   <img src="sawyer_gazebo_env/sawyer.png/" height="500" width="700">
 </p>
+
+## File setup:
+Clone the repository into the sawyer workspace and then cd to catkin_ws directory  
+```
+$ cd catkin_ws
+$ catkin_make
+```
