@@ -227,6 +227,7 @@ def main():
         point.y = y
         point.z = 0.05
         spawn_cube(x, y)
+        time.sleep(0.5)
 
         if is_joystick:
             joystick_control()

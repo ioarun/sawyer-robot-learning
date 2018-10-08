@@ -66,7 +66,7 @@ class DataRecorder(object):
         joints_right = self._limb_right.joint_names()
         
         data_path = 'data/'
-        if not os.path.exits(data_path):
+        if not os.path.exists(data_path):
             os.makedirs(data_path)
 
         image_path = 'data/'+str(self.counter) 
@@ -111,7 +111,7 @@ def handle_stop_recording(req):
     print "returning stop"
     dr.stop()
     dr.counter += 1
-    dr.filename = str(jr.counter)+'.csv'
+    dr.filename = str(dr.counter)+'.csv'
     return StopRecordingResponse()
 
 def handle_image_cb(msg):
