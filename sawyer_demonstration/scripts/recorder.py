@@ -64,7 +64,7 @@ class JointRecorder(object):
             f.write(','.join([j for j in joints_right]) + ',' + temp_str)
             if self._gripper:
                 f.write(self.gripper_name+'\n')
-            while not jr._done:
+            while not dr._done:
                 if self._gripper:
                     if self._cuff.upper_button():
                         self._gripper.open()
@@ -82,21 +82,21 @@ class JointRecorder(object):
 
 def handle_start_recording(req):
     print "returning start"
-    jr.start()
+    dr.start()
     return StartRecordingResponse()
 
 def handle_stop_recording(req):
     print "returning stop"
-    jr.stop()
-    jr.counter += 1
-    jr.filename = str(jr.counter)+'.csv'
+    dr.stop()
+    dr.counter += 1
+    dr.filename = str(dr.counter)+'.csv'
     return StopRecordingResponse()
 
 
 rospy.init_node('joint_recorder_node')
-jr = JointRecorder(100)
+dr = JointRecorder(100)
 s_start = rospy.Service('start_recording', StartRecording, handle_start_recording)
 s_stop = rospy.Service('stop_recording', StopRecording, handle_stop_recording)
 
 while not rospy.is_shutdown():
-    jr.record()
+    dr.record()
