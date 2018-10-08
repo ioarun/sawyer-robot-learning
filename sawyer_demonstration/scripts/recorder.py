@@ -68,7 +68,7 @@ class JointRecorder(object):
                 if self._gripper:
                     if self._cuff.upper_button():
                         self._gripper.open()
-                    elif self._cuff.lower_button():
+                    else self._cuff.lower_button():
                         self._gripper.close()
                 angles_right = [self._limb_right.joint_angle(j)
                                 for j in joints_right]
