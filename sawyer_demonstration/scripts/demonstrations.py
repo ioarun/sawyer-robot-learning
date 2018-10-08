@@ -164,7 +164,7 @@ def main():
     rospy.Subscriber('/recorder/message/start', Bool, recorder_cb)
 
     random.seed(1)
-    gripper_open = False
+    gripper_open = True
     # spawn_cube(x, y)
     move_to_neutral()
     spawn_table()
@@ -176,7 +176,7 @@ def main():
         y = (random.uniform(-0.4, 0.4))
         point.x = x
         point.y = y
-        point.z = 0.05
+        point.z = 0.030
         spawn_cube(x, y)
 
         # if len(joystick._controls) > 0:
