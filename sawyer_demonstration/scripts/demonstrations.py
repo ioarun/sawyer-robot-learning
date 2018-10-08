@@ -28,11 +28,11 @@ from intera_interface import CHECK_VERSION
 
 import time
 import datetime
-import moveit_commander
 import sys
 
 from copy import deepcopy
 import numpy as np
+import csv
 
 import random
 from joystick import CustomController
@@ -150,38 +150,63 @@ def recorder_cb(msg):
 
 def joystick_control():
     if len(joystick._controls) > 0:
-    # if leftBumper button is clicked : Open the gripper.
-    if joystick._controls['leftBumper'] and (not gripper_open):
-        gripper.open()
-        gripper_open = True
-    elif joystick._controls['leftBumper'] and gripper_open:
-        gripper.close()
-        gripper_open = False
+        # if leftBumper button is clicked : Open the gripper.
+        if joystick._controls['leftBumper'] and (not gripper_open):
+            gripper.open()
+            gripper_open = True
+        elif joystick._controls['leftBumper'] and gripper_open:
+            gripper.close()
+            gripper_open = False
 
-    if joystick._controls['rightBumper']:
-        # reset()
-        move_to_neutral()
-        print "reset"
+        if joystick._controls['rightBumper']:
+            # reset()
+            move_to_neutral()
+            print "reset"
 
-    if joystick._controls['leftStickHorz'] < 0.0:
-        point.x += 0.01
-        # print "right"
-    elif joystick._controls['leftStickHorz'] > 0.0:
-        point.x -= 0.01
-        # print "left"
+        if joystick._controls['leftStickHorz'] < 0.0:
+            point.x += 0.01
+            # print "right"
+        elif joystick._controls['leftStickHorz'] > 0.0:
+            point.x -= 0.01
+            # print "left"
 
-    if joystick._controls['leftStickVert'] < 0.0:
-        point.y -= 0.01
-        # print "down"
-    elif joystick._controls['leftStickVert'] > 0.0:
-        point.y += 0.01
-        # print "up"
+        if joystick._controls['leftStickVert'] < 0.0:
+            point.y -= 0.01
+            # print "down"
+        elif joystick._controls['leftStickVert'] > 0.0:
+            point.y += 0.01
+            # print "up"
 
-    if joystick._controls['rightStickVert'] > 0.0:
-        point.z += 0.01
-    elif joystick._controls['rightStickVert'] < 0.0:
-        point.z -= 0.01
+        if joystick._controls['rightStickVert'] > 0.0:
+            point.z += 0.01
+        elif joystick._controls['rightStickVert'] < 0.0:
+            point.z -= 0.01
 
+def try_float(x):
+    try:
+        return float(x)
+    except ValueError:
+        return None
+
+
+def replay(file_name):
+    src_file = open(file_name, 'rb')
+    reader = csv.reader(src_file)
+    reader.next()
+
+    for row in reader:
+        j0 = try_float(row[1])
+        j1 = try_float(row[2])
+        j2 = try_float(row[3])
+        j3 = try_float(row[4])
+        j4 = try_float(row[5])
+        j5 = try_float(row[6])
+        j6 = try_float(row[7])
+        joint_positions = [j0, j1, j2, j3, j4, j5, j6]
+        limb.set_joint_positions(joint_positions)
+
+
+is_joystick = False
 joystick = CustomController()
 gripper = intera_interface.Gripper()
 
@@ -203,14 +228,14 @@ def main():
         point.z = 0.05
         spawn_cube(x, y)
 
-        if joystick:
+        if is_joystick:
             joystick_control()
         
 
         if limb.ik_request(pose) != False:
             rospy.wait_for_service('start_recording')
             try:
-                start_recording = rospy.ServiceProxy('start_recording', Empty)
+                start_recording = rospy.ServiceProxy('start_recording', StartRecording)
                 resp1 = start_recording()
                 # return resp1
                 print "resp1"
@@ -222,7 +247,7 @@ def main():
 
             rospy.wait_for_service('stop_recording')
             try:
-                stop_recording = rospy.ServiceProxy('stop_recording', Empty)
+                stop_recording = rospy.ServiceProxy('stop_recording', StopRecording)
                 resp2 = stop_recording()
                 # return resp2
                 print "resp2"

@@ -6,11 +6,15 @@ from intera_interface import CHECK_VERSION
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+# OpenCV2 for saving an image
+import cv2
+import os
 
 from sawyer_demonstration.srv import *
 
-
-class JointRecorder(object):
+class DataRecorder(object):
     def __init__(self, rate, side="right"):
         """
         Records joint data to a file at a specified rate.
@@ -23,6 +27,8 @@ class JointRecorder(object):
         self.counter = 0
         self.is_recording = False
         self.filename = str(self.counter)+'.csv'
+        self.cv2_img = None
+        self.img_counter = 0
 
         self._limb_right = intera_interface.Limb(side)
         try:
@@ -58,13 +64,22 @@ class JointRecorder(object):
 
         """
         joints_right = self._limb_right.joint_names()
-        with open(self.filename, 'w') as f:
+        
+        data_path = 'data/'
+        if not os.path.exits(data_path):
+            os.makedirs(data_path)
+
+        image_path = 'data/'+str(self.counter) 
+        if not os.path.exists(image_path):
+            os.makedirs(image_path)
+
+        with open('data/'+self.filename, 'w') as f:
             f.write('time,')
             temp_str = '' if self._gripper else '\n'
             f.write(','.join([j for j in joints_right]) + ',' + temp_str)
             if self._gripper:
                 f.write(self.gripper_name+'\n')
-            while not jr._done:
+            while not dr._done:
                 if self._gripper:
                     if self._cuff.upper_button():
                         self._gripper.open()
@@ -74,29 +89,49 @@ class JointRecorder(object):
                                 for j in joints_right]
                 f.write("%f," % (self._time_stamp(),))
                 f.write(','.join([str(x) for x in angles_right]) + ',' + temp_str)
+                
+                # save current snapshot
+                cv2.imwrite('data/'+str(dr.counter)+'/image_'+str(self.img_counter)+'.jpeg', dr.cv2_img)
+                self.img_counter += 1
+
                 if self._gripper:
                     f.write(str(self._gripper.get_position()) + '\n')
 
                 self._rate.sleep()
 
+            self.img_counter = 0
+
 
 def handle_start_recording(req):
     print "returning start"
-    jr.start()
+    dr.start()
     return StartRecordingResponse()
 
 def handle_stop_recording(req):
     print "returning stop"
-    jr.stop()
-    jr.counter += 1
-    jr.filename = str(jr.counter)+'.csv'
+    dr.stop()
+    dr.counter += 1
+    dr.filename = str(jr.counter)+'.csv'
     return StopRecordingResponse()
+
+def handle_image_cb(msg):
+    try:
+        # Convert your ROS Image message to OpenCV2
+        dr.cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
+    except CvBridgeError, e:
+        print(e)
 
 
 rospy.init_node('joint_recorder_node')
-jr = JointRecorder(100)
+
+# Instantiate CvBridge
+bridge = CvBridge()
+
+dr = DataRecorder(100)
 s_start = rospy.Service('start_recording', StartRecording, handle_start_recording)
 s_stop = rospy.Service('stop_recording', StopRecording, handle_stop_recording)
+camera_sub = rospy.Subscriber('/top_camera/camera/image_raw', Image, handle_image_cb)
+
 
 while not rospy.is_shutdown():
-    jr.record()
+    dr.record()
