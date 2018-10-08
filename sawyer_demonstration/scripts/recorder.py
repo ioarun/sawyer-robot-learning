@@ -7,6 +7,9 @@ from intera_interface import CHECK_VERSION
 from std_msgs.msg import String
 from std_msgs.msg import Bool
 
+from sawyer_demonstration.srv import *
+
+
 class JointRecorder(object):
     def __init__(self, rate, side="right"):
         """
@@ -41,12 +44,11 @@ class JointRecorder(object):
     def _time_stamp(self):
         return rospy.get_time() - self._start_time
 
-    def stop(self):
-        self._done = True
+    def start(self):
+        self._done =  False
 
-    def done(self, flag):
-        self._done = flag
-        return self._done    
+    def stop(self):
+        self._done = True  
 
     def record(self):
         """
@@ -54,9 +56,7 @@ class JointRecorder(object):
         provided at construction this function will record the latest set of
         joint angles in a csv format.
 
-        If a file exists, the function will overwrite existing file.
         """
-        # if self.filename:
         joints_right = self._limb_right.joint_names()
         with open(self.filename, 'w') as f:
             f.write('time,')
@@ -64,7 +64,7 @@ class JointRecorder(object):
             f.write(','.join([j for j in joints_right]) + ',' + temp_str)
             if self._gripper:
                 f.write(self.gripper_name+'\n')
-            while not self._done:
+            while not jr._done:
                 if self._gripper:
                     if self._cuff.upper_button():
                         self._gripper.open()
@@ -78,40 +78,25 @@ class JointRecorder(object):
                     f.write(str(self._gripper.get_position()) + '\n')
 
                 self._rate.sleep()
-           
 
-def demo_subscriber_cb(msg):
-    print msg
-    # if data == "True" and not jr.is_recording:
-    #     print "started recording"
-    #     jr.is_recording = True
-    #     # start recording
-    #     jr.done(False)
-    # elif data == "False" and jr.is_recording:
-    #     print "done recording"
-    #     jr.is_recording = False
-    #     self.counter += 1
-    #     filename = str(self.counter)+'.csv'
-    #     self.filename = filename
-    #     jr.done(True)
-    if msg.data == True:
-        print "start it"
-        # send back the command to begin the demonstration
-        data = Bool()
-        data.data = True
-        recorder_publisher.publish(data)
-        jr._done = False
-    elif msg.data == False:
-        print "stop it"
-        jr._done = True
-        jr.counter += 1
-        filename = str(jr.counter)+'.csv'
-        jr.filename = filename
+
+def handle_start_recording(req):
+    print "returning start"
+    jr.start()
+    return StartRecordingResponse()
+
+def handle_stop_recording(req):
+    print "returning stop"
+    jr.stop()
+    jr.counter += 1
+    jr.filename = str(jr.counter)+'.csv'
+    return StopRecordingResponse()
 
 
 rospy.init_node('joint_recorder_node')
-jr = JointRecorder(100) # frequency of recordin
-demo_subscriber = rospy.Subscriber('/demonstrator/message/start', Bool, demo_subscriber_cb)
-recorder_publisher = rospy.Publisher('/recorder/message/start', Bool, queue_size=10)
+jr = JointRecorder(100)
+s_start = rospy.Service('start_recording', StartRecording, handle_start_recording)
+s_stop = rospy.Service('stop_recording', StopRecording, handle_stop_recording)
+
 while not rospy.is_shutdown():
     jr.record()
