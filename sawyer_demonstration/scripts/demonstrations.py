@@ -36,16 +36,10 @@ import numpy as np
 
 import random
 from joystick import CustomController
-# from recorder import JointRecorder
+from sawyer_demonstration.srv import *
 
 rospy.init_node('demonstrator_node')
 
-demonstrator_publisher = rospy.Publisher('/demonstrator/message/start', Bool, queue_size=10)
-# recorder_subscriber_start = rospy.Subscriber('/recorder/message/start', String, ping_from_the_recorder_start_cb)
-# recorder_subscriber_stop = rospy.Subscriber('/recorder/message/stop', String, ping_from_the_recorder_stop_cb)
-
-flag = False
-start_recording = False
 
 limb = intera_interface.Limb('right')
 from geometry_msgs.msg import Pose
@@ -145,7 +139,7 @@ def ping_from_the_recorder_start_cb(data):
 def ping_from_the_recorder_stop_cb(data):
     print "recorder pings :", data
 
-def EndpointStateCb(data):
+def end_point_state_cb(data):
     current_x = data.pose.position.x
     current_y = data.pose.position.y
     current_z = data.pose.position.z
@@ -154,18 +148,48 @@ def recorder_cb(msg):
     data = msg.data
     start_recording = data
 
+def joystick_control():
+    if len(joystick._controls) > 0:
+    # if leftBumper button is clicked : Open the gripper.
+    if joystick._controls['leftBumper'] and (not gripper_open):
+        gripper.open()
+        gripper_open = True
+    elif joystick._controls['leftBumper'] and gripper_open:
+        gripper.close()
+        gripper_open = False
+
+    if joystick._controls['rightBumper']:
+        # reset()
+        move_to_neutral()
+        print "reset"
+
+    if joystick._controls['leftStickHorz'] < 0.0:
+        point.x += 0.01
+        # print "right"
+    elif joystick._controls['leftStickHorz'] > 0.0:
+        point.x -= 0.01
+        # print "left"
+
+    if joystick._controls['leftStickVert'] < 0.0:
+        point.y -= 0.01
+        # print "down"
+    elif joystick._controls['leftStickVert'] > 0.0:
+        point.y += 0.01
+        # print "up"
+
+    if joystick._controls['rightStickVert'] > 0.0:
+        point.z += 0.01
+    elif joystick._controls['rightStickVert'] < 0.0:
+        point.z -= 0.01
 
 joystick = CustomController()
 gripper = intera_interface.Gripper()
-start_demo = False
 
 def main():
-    rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, EndpointStateCb)
-    rospy.Subscriber('/recorder/message/start', Bool, recorder_cb)
+    rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, end_point_state_cb)
 
     random.seed(1)
     gripper_open = False
-    # spawn_cube(x, y)
     move_to_neutral()
     spawn_table()
     rospy.on_shutdown(delete_table)
@@ -179,57 +203,31 @@ def main():
         point.z = 0.05
         spawn_cube(x, y)
 
-        # if len(joystick._controls) > 0:
-        #     # if leftBumper button is clicked : Open the gripper.
-        #     if joystick._controls['leftBumper'] and (not gripper_open):
-        #         gripper.open()
-        #         gripper_open = True
-        #     elif joystick._controls['leftBumper'] and gripper_open:
-        #         gripper.close()
-        #         gripper_open = False
-
-        #     if joystick._controls['rightBumper']:
-        #         # reset()
-        #         move_to_neutral()
-        #         print "reset"
-
-        #     if joystick._controls['leftStickHorz'] < 0.0:
-        #         point.x += 0.01
-        #         # print "right"
-        #     elif joystick._controls['leftStickHorz'] > 0.0:
-        #         point.x -= 0.01
-        #         # print "left"
-
-        #     if joystick._controls['leftStickVert'] < 0.0:
-        #         point.y -= 0.01
-        #         # print "down"
-        #     elif joystick._controls['leftStickVert'] > 0.0:
-        #         point.y += 0.01
-        #         # print "up"
-
-        #     if joystick._controls['rightStickVert'] > 0.0:
-        #         point.z += 0.01
-        #     elif joystick._controls['rightStickVert'] < 0.0:
-        #         point.z -= 0.01
-
-        # start recording 
-        # if not already recording
-        # if not start_recording:
-        #     demonstrator_publisher.publish("True")
-        # else:
-        #     demonstrator_publisher.publish("False")
+        if joystick:
+            joystick_control()
         
 
         if limb.ik_request(pose) != False:
-            bool_data = Bool()
-            bool_data.data = True
-            demonstrator_publisher.publish(bool_data)
+            rospy.wait_for_service('start_recording')
+            try:
+                start_recording = rospy.ServiceProxy('start_recording', Empty)
+                resp1 = start_recording()
+                # return resp1
+                print "resp1"
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
+
             limb.move_to_joint_positions(limb.ik_request(pose))
-            bool_data.data = False  
-            # inform the recorder that demonstration
-            # is completed.
-            demonstrator_publisher.publish(bool_data) 
-            start_recording = False  
+
+
+            rospy.wait_for_service('stop_recording')
+            try:
+                stop_recording = rospy.ServiceProxy('stop_recording', Empty)
+                resp2 = stop_recording()
+                # return resp2
+                print "resp2"
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e 
         else:
             print "IK Request failed."
         
