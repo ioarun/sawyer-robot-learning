@@ -12,7 +12,7 @@
   </include>
 
   <param name="camera_description"
-      command="$(find xacro)/xacro --inorder $(find sawyer_gazebo_env)/urdf/camera.urdf.xacro"/>
+      command="$(find xacro)/xacro --inorder $(find sawyer_gazebo_env)/models/camera/camera.urdf.xacro"/>
 
   <node name="camera_urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
   args="-param camera_description -urdf -model sawyer_top_camera" />

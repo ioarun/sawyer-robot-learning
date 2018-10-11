@@ -15,6 +15,7 @@
 import rospy
 
 from sensor_msgs.msg import Joy
+import intera_interface
 
 
 class ButtonTransition(object):
@@ -175,6 +176,8 @@ class CustomController(Joystick):
     """
     def __init__(self, scale=1.0, offset=0.0, deadband=0.1):
         super(CustomController, self).__init__(scale, offset, deadband)
+        self.gripper = intera_interface.Gripper()
+        self.gripper_open = False
 
     def _on_joy(self, msg):
         """ callback for messages from joystick input
@@ -195,7 +198,6 @@ class CustomController(Joystick):
         self._controls['leftStickVert'] = msg.axes[1]
         self._controls['rightStickHorz'] = msg.axes[2]
         self._controls['rightStickVert'] = msg.axes[3]
-
         self._controls['leftBumper'] = (msg.buttons[4] == 1)
         self._controls['rightBumper'] = (msg.buttons[5] == 1)
         self._controls['leftTrigger'] = (msg.buttons[6] < 0.0)

@@ -109,6 +109,26 @@ def spawn_cube(_x, _y, block_reference_frame="world"):
     except rospy.ServiceException, e:
         rospy.logerr("Spawn URDF service call failed: {0}".format(e))
 
+def spawn_saucer(_x, _y, saucer_reference_frame="world"):
+    # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
+    saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.7725))
+    # Get Models' Path
+    model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
+    
+    # Load Saucer URDF
+    saucer_xml = ''
+    with open (model_path + "plate/plate.urdf", "r") as saucer_file:
+        saucer_xml=saucer_file.read().replace('\n', '')
+
+    # Spawn Saucer URDF
+    rospy.wait_for_service('/gazebo/spawn_urdf_model')
+    try:
+        spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
+        resp_urdf = spawn_urdf("plate", saucer_xml, "/",
+                               saucer_pose, saucer_reference_frame)
+    except rospy.ServiceException, e:
+        rospy.logerr("Spawn URDF service call failed: {0}".format(e))
+
 def delete_table():
     try:
         delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
@@ -120,6 +140,13 @@ def delete_cube():
     try:
         delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
         resp_delete = delete_model("block")
+    except rospy.ServiceException, e:
+        print("Delete Model service call failed: {0}".format(e))
+
+def delete_saucer():
+    try:
+        delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+        resp_delete = delete_model("plate")
     except rospy.ServiceException, e:
         print("Delete Model service call failed: {0}".format(e))
 
@@ -151,12 +178,14 @@ def recorder_cb(msg):
 def joystick_control():
     if len(joystick._controls) > 0:
         # if leftBumper button is clicked : Open the gripper.
-        if joystick._controls['leftBumper'] and (not gripper_open):
-            gripper.open()
-            gripper_open = True
-        elif joystick._controls['leftBumper'] and gripper_open:
-            gripper.close()
-            gripper_open = False
+        if joystick._controls['leftBumper'] and (not joystick.gripper_open):
+            joystick.gripper.open()
+            joystick.gripper_open = True
+            time.sleep(0.05)
+        if joystick._controls['leftBumper'] and joystick.gripper_open:
+            joystick.gripper.close()
+            joystick.gripper_open = False
+            time.sleep(0.05)
 
         if joystick._controls['rightBumper']:
             # reset()
@@ -164,23 +193,23 @@ def joystick_control():
             print "reset"
 
         if joystick._controls['leftStickHorz'] < 0.0:
-            point.x += 0.01
+            point.y -= 0.005
             # print "right"
         elif joystick._controls['leftStickHorz'] > 0.0:
-            point.x -= 0.01
+            point.y += 0.005
             # print "left"
 
         if joystick._controls['leftStickVert'] < 0.0:
-            point.y -= 0.01
+            point.x -= 0.005
             # print "down"
         elif joystick._controls['leftStickVert'] > 0.0:
-            point.y += 0.01
+            point.x += 0.005
             # print "up"
 
         if joystick._controls['rightStickVert'] > 0.0:
-            point.z += 0.01
+            point.z -= 0.005
         elif joystick._controls['rightStickVert'] < 0.0:
-            point.z -= 0.01
+            point.z += 0.005
 
 def try_float(x):
     try:
@@ -206,58 +235,64 @@ def replay(file_name):
         limb.set_joint_positions(joint_positions)
 
 
-is_joystick = False
+is_joystick = True
 joystick = CustomController()
-gripper = intera_interface.Gripper()
-
 def main():
     rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, end_point_state_cb)
 
     random.seed(1)
-    gripper_open = False
     move_to_neutral()
     spawn_table()
+    x = (random.uniform(0.5, 0.7))
+    y = (random.uniform(-0.4, 0.4))
+    spawn_cube(x, y)
+    x = (random.uniform(0.5, 0.7))
+    y = (random.uniform(-0.4, 0.4))
+    spawn_saucer(x, y)
     rospy.on_shutdown(delete_table)
     rospy.on_shutdown(delete_cube)
+    rospy.on_shutdown(delete_saucer)
+    
     while not rospy.is_shutdown():
-        move_to_neutral()
-        x = (random.uniform(0.5, 0.7))
-        y = (random.uniform(-0.4, 0.4))
-        point.x = x
-        point.y = y
-        point.z = 0.05
-        spawn_cube(x, y)
-        time.sleep(0.5)
+        # move_to_neutral()
+        # x = (random.uniform(0.5, 0.7))
+        # y = (random.uniform(-0.4, 0.4))
+        # point.x = x
+        # point.y = y
+        # point.z = 0.05
+        # spawn_cube(x, y)
+        # time.sleep(0.5)
 
         if is_joystick:
             joystick_control()
         
 
         if limb.ik_request(pose) != False:
-            rospy.wait_for_service('start_recording')
-            try:
-                start_recording = rospy.ServiceProxy('start_recording', StartRecording)
-                resp1 = start_recording()
-                # return resp1
-                print "resp1"
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
+            # rospy.wait_for_service('start_recording')
+            # try:
+            #     start_recording = rospy.ServiceProxy('start_recording', StartRecording)
+            #     resp1 = start_recording()
+            #     # return resp1
+            #     print "resp1"
+            # except rospy.ServiceException, e:
+            #     print "Service call failed: %s"%e
 
             limb.move_to_joint_positions(limb.ik_request(pose))
 
 
-            rospy.wait_for_service('stop_recording')
-            try:
-                stop_recording = rospy.ServiceProxy('stop_recording', StopRecording)
-                resp2 = stop_recording()
-                # return resp2
-                print "resp2"
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e 
+            # rospy.wait_for_service('stop_recording')
+            # try:
+            #     stop_recording = rospy.ServiceProxy('stop_recording', StopRecording)
+            #     resp2 = stop_recording()
+            #     # return resp2
+            #     print "resp2"
+            # except rospy.ServiceException, e:
+            #     print "Service call failed: %s"%e 
         else:
             print "IK Request failed."
         
-        delete_cube()
+        # delete_cube()
+
     
 
 if __name__ == '__main__':
