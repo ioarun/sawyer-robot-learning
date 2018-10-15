@@ -77,6 +77,7 @@ class DataRecorder(object):
             f.write('time,')
             temp_str = '' if self._gripper else '\n'
             f.write(','.join([j for j in joints_right]) + ',' + temp_str)
+            f.write('joint_trajectory_id ,')
             if self._gripper:
                 f.write(self.gripper_name+'\n')
             while not dr._done:
@@ -92,6 +93,8 @@ class DataRecorder(object):
                 
                 # save current snapshot
                 cv2.imwrite('data/'+str(dr.counter)+'/image_'+str(self.img_counter)+'.jpeg', dr.cv2_img)
+
+                f.write('data_jt_'+str(self.img_counter)+',')
                 self.img_counter += 1
 
                 if self._gripper:

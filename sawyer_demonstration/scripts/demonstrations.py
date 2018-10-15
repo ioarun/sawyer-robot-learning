@@ -36,6 +36,7 @@ import csv
 
 import random
 from joystick import CustomController
+from novint_falcon_joystick import NovintFalcon
 from sawyer_demonstration.srv import *
 
 rospy.init_node('demonstrator_node')
@@ -211,6 +212,22 @@ def joystick_control():
         elif joystick._controls['rightStickVert'] < 0.0:
             point.z += 0.005
 
+def falcon_control():
+    if falcon._button == 4:
+        print round(falcon._value_x, 3), " ", round(falcon._value_y, 3), " ", round(falcon._value_z, 3)
+        point.z += round(falcon._value_y, 3)/10.0
+        point.y += round(falcon._value_x, 3)/10.0
+
+        if round(falcon._value_z, 3)/10.0 < falcon._current_value_z:
+            point.x -= round(falcon._value_z, 3)/10.0
+            # point.x -= abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
+        elif round(falcon._value_z, 3)/10.0 > falcon._current_value_z:
+            point.x += round(falcon._value_z, 3)/10.0
+            # point.x += abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
+
+        falcon._current_value_z = round(falcon._value_z, 3)/10.0
+
+
 def try_float(x):
     try:
         return float(x)
@@ -235,23 +252,22 @@ def replay(file_name):
         limb.set_joint_positions(joint_positions)
 
 
-is_joystick = True
+is_joystick = False
+is_falcon = True
 joystick = CustomController()
+falcon = NovintFalcon()
+
+
 def main():
     rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState, end_point_state_cb)
 
     random.seed(1)
+
     move_to_neutral()
+
     spawn_table()
-    x = (random.uniform(0.5, 0.7))
-    y = (random.uniform(-0.4, 0.4))
-    spawn_cube(x, y)
-    x = (random.uniform(0.5, 0.7))
-    y = (random.uniform(-0.4, 0.4))
-    spawn_saucer(x, y)
     rospy.on_shutdown(delete_table)
     rospy.on_shutdown(delete_cube)
-    rospy.on_shutdown(delete_saucer)
     
     while not rospy.is_shutdown():
         # move_to_neutral()
@@ -265,8 +281,9 @@ def main():
 
         if is_joystick:
             joystick_control()
+        if is_falcon:
+            falcon_control()
         
-
         if limb.ik_request(pose) != False:
             # rospy.wait_for_service('start_recording')
             # try:
@@ -291,7 +308,7 @@ def main():
         else:
             print "IK Request failed."
         
-        # delete_cube()
+        delete_cube()
 
     
 
