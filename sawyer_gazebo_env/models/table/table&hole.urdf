@@ -1,0 +1,110 @@
+<robot name="table">
+  
+  <link name="world" />
+  
+  <joint name="world_table" type="fixed">
+    
+    <origin xyz="0.05 0.0 0.0" rpy="0 0 0"></origin>
+    <parent link="world"></parent>
+    <child link="table"></child>
+    <axis xyz="1 0 0"></axis>
+  </joint>
+
+  <link
+    name="table">
+    <inertial>
+      <origin
+        xyz="-1.3868E-18 2.64389972581082E-17 0.58188"
+        rpy="0 0 0" />
+      <mass
+        value="10" />
+      <inertia
+        ixx="1.75770116451796"
+        ixy="-3.6166485463331E-16"
+        ixz="3.53511831725085E-17"
+        iyy="1.75770116451796"
+        iyz="-1.00754931171109E-16"
+        izz="1.12058228384598" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/table/table.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/table/table.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="table">
+      <material>Gazebo/Black</material>
+      <mu1>1000</mu1>
+      <mu2>1000</mu2>
+  </gazebo>
+
+<joint name="table_hole" type="fixed">
+    <origin xyz="-0.25 0.05 0.82" rpy="0 0 0"></origin>
+    <parent link="table"></parent>
+    <child link="hole"></child>
+    <axis xyz="0 0 1"></axis>
+</joint>
+
+<link name="hole">
+    <inertial>
+      <origin
+        xyz="-4.3735E-11 -1.19539999999987E-05 0.021582"
+        rpy="0 0 0" />
+      <mass
+        value="0.60699" />
+      <inertia
+        ixx="0.000216777802721257"
+        ixy="-5.25084112893969E-13"
+        ixz="-8.24312727996716E-14"
+        iyy="0.000216902661958809"
+        iyz="1.75405875164843E-08"
+        izz="0.000214289433618235" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/hole/hole.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/hole/hole.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="hole">
+      <material>Gazebo/Grey</material>
+      <mu1>1000</mu1>
+      <mu2>1000</mu2>
+  </gazebo>
+</robot>
