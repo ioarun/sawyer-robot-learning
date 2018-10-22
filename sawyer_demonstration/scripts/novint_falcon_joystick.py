@@ -3,10 +3,13 @@
 # demonstrations.
 import rospy
 from sensor_msgs.msg import Joy
+from ros_falcon.msg import falconForces
 
 class NovintFalcon(object):
 	def __init__(self):
 		sub = rospy.Subscriber('/falcon/joystick', Joy, self._on_msg)
+		self._pub = rospy.Publisher('/falconForce', falconForces, queue_size=10)
+
 		self._value_x = 0.0
 		self._value_y = 0.0
 		self._value_z = 0.0

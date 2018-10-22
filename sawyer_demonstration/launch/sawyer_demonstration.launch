@@ -4,17 +4,20 @@
   <arg name="dev" default="/dev/input/js0" />
 
   <!-- Start the Joy Node -->
-  <node name="joy_node" pkg="joy"
+<!--   <node name="joy_node" pkg="joy"
   type="joy_node" required="true" output="screen">
     <param name="dev" type="string" value="$(arg dev)" />
-  </node>
+  </node> -->
 
   <!-- Demonstration Type Argument: {reaching, pick_n_place} -->
   <arg name="task" default="reaching"/>
+  <!-- Controller Type Argument: {joystick, falcon} -->
+  <arg name="controller" default="joystick"/>
+
 
   <!-- Run the Sawyer Demonstration -->
   <node name="demonstrations" pkg="sawyer_demonstration"
-  type="demonstrations.py" args="--task $(arg task)"
+  type="main.py" args="--task $(arg task) --controller $(arg controller)"
   required="true" output="screen" />
 
 </launch>
