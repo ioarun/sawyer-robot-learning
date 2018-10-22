@@ -1,0 +1,48 @@
+<robot
+  name="peg_force_torque_sensor">
+  <link
+    name="peg_ft">
+    <inertial>
+      <origin
+        xyz="-2.7718E-09 -1.10939999995788E-07 0.068783"
+        rpy="0 0 0" />
+      <mass
+        value="0.90076" />
+      <inertia
+        ixx="0.00132479495101962"
+        ixy="-3.08947851208025E-11"
+        ixz="1.98248884668973E-10"
+        iyy="0.00132478847209438"
+        iyz="-4.68340786976969E-09"
+        izz="0.000140005814313109" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg_ft/peg_ft.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg_ft/peg_ft.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="peg_ft">
+      <material>Gazebo/Grey</material>
+      <mu1>1000</mu1>
+      <mu2>1000</mu2>
+  </gazebo>
+</robot>
