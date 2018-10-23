@@ -102,15 +102,15 @@ class Demonstration(object):
     def _spawn_table(self, table_pose=Pose(position=Point(x=0.75, y=0.0, z=0.0)),table_reference_frame="world"):
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
-        # Load Table SDF
+        # Load Table URDF
         table_xml = ''
         with open (model_path + "table/table.urdf", "r") as table_file:
             table_xml=table_file.read().replace('\n', '')
-        # Spawn Table SDF
+        # Spawn Table URDF
         rospy.wait_for_service('/gazebo/spawn_urdf_model')
         try:
             spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
-            resp_urdf = spawn_urdf("cafe_table", table_xml, "/",
+            resp_urdf = spawn_urdf("table", table_xml, "/",
                                  table_pose, table_reference_frame)
         except rospy.ServiceException, e:
             rospy.logerr("Spawn SDF service call failed: {0}".format(e))
@@ -118,7 +118,7 @@ class Demonstration(object):
 
     def spawn_saucer(_x, _y, saucer_reference_frame="world"):
         # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
-        saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.7725))
+        saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
         
