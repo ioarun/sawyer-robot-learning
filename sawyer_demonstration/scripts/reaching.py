@@ -32,7 +32,7 @@ class ReachingTask(object):
 
     def spawn_cube(self, _x, _y, block_reference_frame="world"):
         # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
-        block_pose=Pose(position=Point(x=_x, y=_y, z=0.7725))
+        block_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_sim_examples')+"/models/"
         
@@ -52,7 +52,7 @@ class ReachingTask(object):
 
     def spawn_saucer(_x, _y, saucer_reference_frame="world"):
         # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
-        saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.7725))
+        saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
         
