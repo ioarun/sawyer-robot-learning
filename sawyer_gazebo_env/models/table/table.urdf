@@ -1,5 +1,15 @@
 <robot
   name="table">
+  <link name="world" />
+  
+  <joint name="world_table" type="fixed">
+    
+    <origin xyz="0.05 0.0 0.0" rpy="0 0 0"></origin>
+    <parent link="world"></parent>
+    <child link="table"></child>
+    <axis xyz="1 0 0"></axis>
+  </joint>
+  
   <link
     name="table">
     <inertial>
