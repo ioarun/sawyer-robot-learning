@@ -22,7 +22,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://sawyer_gazebo_env/models/table/table.STL" />
+          filename="package://sawyer_gazebo_env/models/table/table3.STL" />
       </geometry>
       <material
         name="">
@@ -36,7 +36,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://sawyer_gazebo_env/models/table/table.STL" />
+          filename="package://sawyer_gazebo_env/models/table/table3.STL" />
       </geometry>
     </collision>
   </link>
