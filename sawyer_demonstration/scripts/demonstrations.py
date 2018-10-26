@@ -115,10 +115,31 @@ class Demonstration(object):
         except rospy.ServiceException, e:
             rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
+
+    def spawn_saucer(_x, _y, saucer_reference_frame="world"):
+        # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
+        saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
+        # Get Models' Path
+        model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
+        
+        # Load Saucer URDF
+        saucer_xml = ''
+        with open (model_path + "plate/plate.urdf", "r") as saucer_file:
+            saucer_xml=saucer_file.read().replace('\n', '')
+
+        # Spawn Saucer URDF
+        rospy.wait_for_service('/gazebo/spawn_urdf_model')
+        try:
+            spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
+            resp_urdf = spawn_urdf("plate", saucer_xml, "/",
+                                   saucer_pose, saucer_reference_frame)
+        except rospy.ServiceException, e:
+            rospy.logerr("Spawn URDF service call failed: {0}".format(e))
+
     def _delete_table(self):
         try:
             delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-            resp_delete = delete_model("cafe_table")
+            resp_delete = delete_model("table")
         except rospy.ServiceException, e:
             print("Delete Model service call failed: {0}".format(e))
 
@@ -137,10 +158,19 @@ class Demonstration(object):
             self.falcon._pub.publish(force_obj)
 
     def move_to_neutral(self):
+        
+        # -J sawyer::right_j0 -0.27
+        # -J sawyer::right_j1 1.05
+        # -J sawyer::right_j2 0.00
+        # -J sawyer::right_j3 0.49
+        # -J sawyer::right_j4 -0.08
+        # -J sawyer::right_j5 -0.06
+        # -J sawyer::right_j6 0.027
+        # -J sawyer::head_pan 0.00
 
         self._point.x = 0.4
         self._point.y = 0.0
-        self._point.z = 0.1
+        self._point.z = 0.15
         
         self._limb.move_to_joint_positions(self._limb.ik_request(self._pose))
 
@@ -220,4 +250,5 @@ class Demonstration(object):
             j6 = try_float(row[7])
             joint_positions = [j0, j1, j2, j3, j4, j5, j6]
             limb.set_joint_positions(joint_positions)
+
 

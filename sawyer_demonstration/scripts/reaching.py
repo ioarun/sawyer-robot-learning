@@ -15,20 +15,29 @@ from gazebo_msgs.srv import (
     DeleteModel,
 )
 import rospkg
+import time
+from sawyer_demonstration.srv import StartRecording
+from sawyer_demonstration.srv import StopRecording
 
 class ReachingTask(object):
     def __init__(self, controller):
         self.demo = Demonstration()
         self.controller = controller
-        # initial setup for reaching task
-        self._initial_setup()
-
-    def _initial_setup(self):
-        random.seed(1)
-        self.spawn_cube(random.uniform(0.5, 0.7), random.uniform(-0.4, 0.4)) # spawn_cube(x, y)
-        # self.spawn_saucer(random.uniform(0.5, 0.7), random.uniform(-0.4, 0.4)) # spawn_saucer(x, y)
+        self.auto = True
         rospy.on_shutdown(self._delete_cube)
-        # rospy.on_shutdown(self._delete_saucer)
+
+    def reset(self):
+        x, y = self.random_spawn_cube()
+        self.demo.move_to_neutral()
+        self.demo._point.x = x
+        self.demo._point.y = y
+        self.demo._point.z = 0.15 # by default, z = 0.15
+
+    def random_spawn_cube(self):
+        x = random.uniform(0.7, 1.0) # 0.5, 0.7
+        y = random.uniform(-0.4, 0.4)
+        self.spawn_cube(x, y)
+        return x, y
 
     def spawn_cube(self, _x, _y, block_reference_frame="world"):
         # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
@@ -95,9 +104,37 @@ class ReachingTask(object):
 
         while not rospy.is_shutdown():
 
-            self.control()
+            if self.auto:
+                self.reset()
+                if self.demo._limb.ik_request(self.demo._pose) != False:
+                    rospy.wait_for_service('start_recording')
+                    try:
+                        start_recording = rospy.ServiceProxy('start_recording', StartRecording)
+                        resp1 = start_recording()
+                        print "started"
+                    except rospy.ServiceException, e:
+                        print "Service call failed: %s"%e
 
-            if self.demo._limb.ik_request(self.demo._pose) != False:
-                self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
+                    self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
+
+                    rospy.wait_for_service('stop_recording')
+                    
+                    try: 
+                        stop_recording = rospy.ServiceProxy('stop_recording', StopRecording)
+                        resp2 = stop_recording()
+                        print "stopped"
+                    except rospy.ServiceException, e:
+                        print "Service call failed: %s"%e
+                else:
+                    print "IK Request failed."
+
+                self._delete_cube()
+
             else:
-                print "IK Request failed."
+                self.control()
+
+                if self.demo._limb.ik_request(self.demo._pose) != False:
+                    self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
+                else:
+                    print "IK Request failed."
+

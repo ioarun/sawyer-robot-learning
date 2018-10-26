@@ -1,15 +1,5 @@
 <robot
   name="table">
-  <link name="world" />
-  
-  <joint name="world_table" type="fixed">
-    
-    <origin xyz="0.05 0.0 0.0" rpy="0 0 0"></origin>
-    <parent link="world"></parent>
-    <child link="table"></child>
-    <axis xyz="1 0 0"></axis>
-  </joint>
-  
   <link
     name="table">
     <inertial>
@@ -50,18 +40,4 @@
       </geometry>
     </collision>
   </link>
-
-<!--   <gazebo reference="table">
-    <sensor name="table_contact_sensor" type="contact">
-      <always_on>true</always_on>
-      <update_rate>100.0</update_rate> 
-      <contact>
-        <collision>table_collision</collision>
-      </contact>
-      <plugin name="gazebo_ros_bumper_controller" filename="libgazebo_ros_bumper.so">
-        <bumperTopicName>/table_contact_sensor_state</bumperTopicName>
-        <frameName>table</frameName>
-      </plugin>
-    </sensor>
-  </gazebo> -->
 </robot>

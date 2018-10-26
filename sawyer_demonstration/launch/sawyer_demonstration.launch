@@ -9,6 +9,8 @@
     <param name="dev" type="string" value="$(arg dev)" />
   </node> -->
 
+  <!-- <env name="GAZEBO_RESOURCE_PATH" value="$GAZEBO_RESOURCE_PATH:$(find sawyer_gazebo_env)/media/materials/scripts/gazebo.material" /> -->
+
   <!-- Demonstration Type Argument: {reaching, pick_n_place} -->
   <arg name="task" default="reaching"/>
   <!-- Controller Type Argument: {joystick, falcon} -->
