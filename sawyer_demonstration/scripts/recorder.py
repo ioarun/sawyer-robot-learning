@@ -130,7 +130,7 @@ rospy.init_node('joint_recorder_node')
 # Instantiate CvBridge
 bridge = CvBridge()
 
-dr = DataRecorder(100)
+dr = DataRecorder(10)
 s_start = rospy.Service('start_recording', StartRecording, handle_start_recording)
 s_stop = rospy.Service('stop_recording', StopRecording, handle_stop_recording)
 camera_sub = rospy.Subscriber('/top_camera/camera/image_raw', Image, handle_image_cb)

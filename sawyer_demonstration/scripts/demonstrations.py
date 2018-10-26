@@ -99,7 +99,7 @@ class Demonstration(object):
     #         rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
 
-    def _spawn_table(self, table_pose=Pose(position=Point(x=0.75, y=0.0, z=0.0)),table_reference_frame="world"):
+    def _spawn_table(self, table_pose=Pose(position=Point(x=0.55, y=0.0, z=0.0)),table_reference_frame="world"):
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
         # Load Table URDF
@@ -170,7 +170,7 @@ class Demonstration(object):
 
         self._point.x = 0.4
         self._point.y = 0.0
-        self._point.z = 0.15
+        self._point.z = 0.0
         
         self._limb.move_to_joint_positions(self._limb.ik_request(self._pose))
 
