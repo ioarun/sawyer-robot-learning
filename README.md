@@ -1,5 +1,5 @@
 # sawyer-robot-learning
-Simulation source code and examples for applying machine learning algorithms on <a href="https://github.com/RethinkRobotics/sawyer_simulator">Sawyer Robot</a>
+This repository contains the simulation source code and examples for applying machine learning algorithms on <b><a href="https://github.com/RethinkRobotics/sawyer_simulator">Sawyer Robot</a></b> in Gazebo simulation environment.
 ## Dependencies & Packages:
 - <a href="http://releases.ubuntu.com/16.04/">Ubuntu 16.04</a>
 - <a href="http://wiki.ros.org/kinetic">ROS Kinetic</a> 
