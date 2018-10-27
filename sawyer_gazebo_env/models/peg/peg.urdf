@@ -1,0 +1,48 @@
+<robot
+  name="peg">
+  <link
+    name="peg">
+    <inertial>
+      <origin
+        xyz="1.9183E-19 6.77894845483107E-19 0.015504"
+        rpy="0 0 0" />
+      <mass
+        value="0.1584" />
+      <inertia
+        ixx="2.19732423542714E-05"
+        ixy="3.11957589841586E-22"
+        ixz="5.63846706479452E-22"
+        iyy="2.45051488121168E-05"
+        iyz="7.67149454453883E-22"
+        izz="1.65349126324047E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg/peg.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg/peg.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="peg">
+      <material>Gazebo/Grey</material>
+      <mu1>1000</mu1>
+      <mu2>1000</mu2>
+  </gazebo>
+</robot>
