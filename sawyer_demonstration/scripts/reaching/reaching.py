@@ -34,7 +34,7 @@ class ReachingTask(object):
         self.demo._point.z = 0.0 # by default, z = 0.15
 
     def random_spawn_cube(self):
-        x = random.uniform(0.5, 0.7) # 0.5, 0.7
+        x = random.uniform(0.5, 0.8) # 0.5, 0.7
         y = random.uniform(-0.4, 0.4)
         self.spawn_cube(x, y)
         return x, y

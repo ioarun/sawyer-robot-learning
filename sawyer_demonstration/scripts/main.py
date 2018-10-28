@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import rospy
-import reaching
 import argparse
 from reaching import ReachingTask
+from peg_in_hole import PegInHole
 
 def main():
     rospy.init_node('demonstration_node')
@@ -34,8 +34,8 @@ def main():
 
     if task == "reaching":
         current_task = ReachingTask(controller)
-    elif task == "peg-in-hole":
-        pass # for now
+    elif task == "peginhole":
+        current_task = PegInHole(controller)
 
     current_task.run()
 

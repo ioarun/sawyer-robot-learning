@@ -35,8 +35,8 @@ import numpy as np
 import csv
 
 import random
-from joystick import CustomController
-from novint_falcon_joystick import NovintFalcon
+from utils import CustomController
+from utils import NovintFalcon
 from sawyer_demonstration.srv import *
 from ros_falcon.msg import falconForces
 from gazebo_msgs.msg import ContactsState
@@ -81,23 +81,6 @@ class Demonstration(object):
         pose.orientation = q
 
         return pose, point, q
-
-    # def _spawn_table(self, table_pose=Pose(position=Point(x=0.75, y=0.0, z=0.0)),table_reference_frame="world"):
-    #     # Get Models' Path
-    #     model_path = rospkg.RosPack().get_path('sawyer_sim_examples')+"/models/"
-    #     # Load Table SDF
-    #     table_xml = ''
-    #     with open (model_path + "cafe_table/model.sdf", "r") as table_file:
-    #         table_xml=table_file.read().replace('\n', '')
-    #     # Spawn Table SDF
-    #     rospy.wait_for_service('/gazebo/spawn_sdf_model')
-    #     try:
-    #         spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
-    #         resp_sdf = spawn_sdf("cafe_table", table_xml, "/",
-    #                              table_pose, table_reference_frame)
-    #     except rospy.ServiceException, e:
-    #         rospy.logerr("Spawn SDF service call failed: {0}".format(e))
-
 
     def _spawn_table(self, table_pose=Pose(position=Point(x=0.55, y=0.0, z=0.0)),table_reference_frame="world"):
         # Get Models' Path

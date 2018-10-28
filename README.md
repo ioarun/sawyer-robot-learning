@@ -1,5 +1,5 @@
 # sawyer-robot-learning
-Simulation source code and examples for applying machine learning algorithms on <a href="https://github.com/RethinkRobotics/sawyer_simulator">Sawyer Robot</a>
+This repository contains the simulation source codes and examples for applying machine learning algorithms on <b><a href="https://github.com/RethinkRobotics/sawyer_simulator">Sawyer Robot</a></b> in Gazebo simulation environment.
 ## Dependencies & Packages:
 - <a href="http://releases.ubuntu.com/16.04/">Ubuntu 16.04</a>
 - <a href="http://wiki.ros.org/kinetic">ROS Kinetic</a> 
@@ -11,9 +11,19 @@ Simulation source code and examples for applying machine learning algorithms on 
   <img src="sawyer_gazebo_env/sawyer_env.png/">
 </p>
 
-## File setup:
+## Setting up the package:
 Clone the repository into the <b>sawyer file</b>(with the previously installed sawyer simulator and sdk's) and then cd to <b>catkin_ws directory</b>  
 ```
 $ cd catkin_ws
 $ catkin_make
 ```
+## How to access the files in the package:
+### Terminal 1: To launch the Sawyer robot in Gazebo environment
+```
+$ roslaunch sawyer_gazebo_env sawyer_gazebo_env.launch
+```
+### Terminal 2: To launch the task specific environment (eg, reaching task)
+```
+$ roslaunch sawyer_demonstration sawyer_demonstration.launch \task:=reaching controller:=falcon
+```
+<b>Note:</b> For different task environment(say, peg in hole) set task:= peginhole and a different controller set controller:=joystick
