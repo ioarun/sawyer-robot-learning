@@ -1,0 +1,73 @@
+<robot
+  name="hole">
+  <link name="world" />
+  
+  <joint name="world_hole" type="fixed">
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"></origin>
+    <parent link="world"></parent>
+    <child link="hole"></child>
+    <axis xyz="0 0 0"></axis>
+  </joint> 
+
+  <link name="hole">
+    <inertial>
+      <origin
+        xyz="-4.3735E-11 -1.19539999999987E-05 0.021582"
+        rpy="0 0 0" />
+      <mass
+        value="0.60699" />
+      <inertia
+        ixx="0.000216777802721257"
+        ixy="-5.25084112893969E-13"
+        ixz="-8.24312727996716E-14"
+        iyy="0.000216902661958809"
+        iyz="1.75405875164843E-08"
+        izz="0.000214289433618235" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/hole_fine/hole_fine.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/hole_fine/hole_fine.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="hole">
+      <material>Gazebo/Grey</material>
+      <kp>10000</kp>
+      <kd>1000</kd>
+      <mu1>0.3</mu1>
+      <mu2>0.3</mu2>
+  </gazebo>
+
+  <gazebo reference="hole">
+    <sensor name="hole_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100.0</update_rate> 
+      <contact>
+        <collision>hole_collision</collision>
+      </contact>
+      <plugin name="gazebo_ros_bumper_controller_2" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>/hole_contact_sensor_state</bumperTopicName>
+        <frameName>hole</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
