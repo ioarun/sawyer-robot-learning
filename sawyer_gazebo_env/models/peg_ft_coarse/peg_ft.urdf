@@ -1,5 +1,5 @@
-<robot name="peg_ft">
-
+<robot
+  name="peg_ft">
   <link
     name="peg_ft">
     <inertial>
@@ -22,7 +22,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://sawyer_gazebo_env/models/peg_ft/peg_ft.STL" />
+          filename="package://sawyer_gazebo_env/models/peg_ft_fine/peg_ft_fine.STL" />
       </geometry>
       <material
         name="">
@@ -36,16 +36,19 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://sawyer_gazebo_env/models/peg_ft/peg_ft.STL" />
+          filename="package://sawyer_gazebo_env/models/peg_ft_fine/peg_ft_fine.STL" />
       </geometry>
     </collision>
   </link>
+
   <gazebo reference="peg_ft">
       <material>Gazebo/Grey</material>
-      <mu1>1000</mu1>
-      <mu2>1000</mu2>
+      <kp>10000</kp>
+      <kd>1000</kd>
+      <mu1>0.3</mu1>
+      <mu2>0.3</mu2>
   </gazebo>
-   
+
   <gazebo reference="peg_ft">
     <sensor name="peg_ft_contact_sensor" type="contact">
       <always_on>true</always_on>
@@ -53,11 +56,10 @@
       <contact>
         <collision>peg_ft_collision</collision>
       </contact>
-      <plugin name="gazebo_ros_bumper_controller_1" filename="libgazebo_ros_bumper.so">
-        <bumperTopicName>peg_ft_contact_sensor_state</bumperTopicName>
+      <plugin name="gazebo_ros_bumper_controller_2" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>/peg_ft_contact_sensor_state</bumperTopicName>
         <frameName>peg_ft</frameName>
       </plugin>
     </sensor>
-  </gazebo> 
-
+  </gazebo>
 </robot>
