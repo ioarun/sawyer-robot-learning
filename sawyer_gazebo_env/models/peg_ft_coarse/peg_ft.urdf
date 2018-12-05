@@ -32,11 +32,11 @@
     </visual>
     <collision>
       <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
+        xyz="0 0 0.070"
+        rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://sawyer_gazebo_env/models/peg_ft_fine/peg_ft_fine.STL" />
+          filename="package://sawyer_gazebo_env/models/peg_ft_coarse/high_res_cylinder.stl" />
       </geometry>
     </collision>
   </link>

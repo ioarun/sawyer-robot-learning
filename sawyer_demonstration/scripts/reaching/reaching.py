@@ -21,27 +21,31 @@ from sawyer_demonstration.srv import StopRecording
 
 class ReachingTask(object):
     def __init__(self, controller):
-        self.demo = Demonstration()
+        self.demo = Demonstration("reaching")
         self.controller = controller
         self.auto = True
+        random.seed(random.randint(1, 100000))
         rospy.on_shutdown(self._delete_cube)
 
     def reset(self):
         x, y = self.random_spawn_cube()
-        self.demo.move_to_neutral()
+        time.sleep(1)
+        print x, y
+        # self.demo.move_to_neutral()
         self.demo._point.x = x
         self.demo._point.y = y
-        self.demo._point.z = 0.0 # by default, z = 0.15
+        self.demo._point.z = 0.0 # by default, z = 0.0
+    
 
     def random_spawn_cube(self):
-        x = random.uniform(0.5, 0.8) # 0.5, 0.7
-        y = random.uniform(-0.4, 0.4)
+        x = round(random.uniform(0.5, 0.8), 3) # 0.5, 0.7
+        y = round(random.uniform(-0.4, 0.4), 3)
         self.spawn_cube(x, y)
         return x, y
 
-    def spawn_cube(self, _x, _y, block_reference_frame="world"):
+    def spawn_cube(self, _x, _y, block_reference_frame="base"):
         # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
-        block_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
+        block_pose=Pose(position=Point(x=_x, y=_y, z=-0.136))
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_sim_examples')+"/models/"
         
@@ -103,9 +107,9 @@ class ReachingTask(object):
     def run(self):
 
         while not rospy.is_shutdown():
-
             if self.auto:
                 self.reset()
+
                 if self.demo._limb.ik_request(self.demo._pose) != False:
                     rospy.wait_for_service('start_recording')
                     try:
@@ -114,9 +118,9 @@ class ReachingTask(object):
                         print "started"
                     except rospy.ServiceException, e:
                         print "Service call failed: %s"%e
-
+                    # time.sleep(1)
                     self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
-
+                    
                     rospy.wait_for_service('stop_recording')
                     
                     try: 
@@ -125,16 +129,19 @@ class ReachingTask(object):
                         print "stopped"
                     except rospy.ServiceException, e:
                         print "Service call failed: %s"%e
+                    # self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
                 else:
                     print "IK Request failed."
 
                 self._delete_cube()
+                
 
             else:
                 self.control()
-
-                if self.demo._limb.ik_request(self.demo._pose) != False:
-                    self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
-                else:
-                    print "IK Request failed."
+                if self.demo._limb.ik_request(self.demo._pose) == False:
+                   
+                    if self.demo._limb.ik_request(self.demo._pose) != False:
+                        self.demo._limb.move_to_joint_positions(self.demo._limb.ik_request(self.demo._pose))
+                    else:
+                        print "IK Request failed."
 
