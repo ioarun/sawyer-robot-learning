@@ -57,10 +57,8 @@ class Demonstration(object):
 
         self._limb = intera_interface.Limb('right')
         self._task = task
-        if task == "reaching":
-            self._pose, self._point, self._q = self._set_initial_pose_of_eef()
-        elif task == "pih":
-            self._pose_peg, self._point_peg, self._q_peg = self._set_initial_peg_pose()
+        
+        self._pose, self._point, self._q = self._set_initial_pose_of_eef()
 
         self._current_x = 0.0
         self._current_y = 0.0
@@ -81,8 +79,7 @@ class Demonstration(object):
         if self._task == "pih":
             self.peg_publisher = rospy.Publisher('/peg_position', Point, queue_size=10)
             # rospy.Subscriber('/right_gripper_r_finger_contact_sensor_state', ContactsState, self._right_gripper_cb)
-            rospy.Subscriber('/peg_ft_contact_sensor_state', ContactsState, self._peg_ft_cb)
-            rospy.Subscriber('/gazebo/model_states', ModelStates, self._model_states_cb)
+            # rospy.Subscriber('/peg_ft_contact_sensor_state', ContactsState, self._peg_ft_cb)
         rospy.Subscriber('/right_gripper_r_finger_contact_sensor_state', ContactsState, self._right_gripper_cb)
         
         rospy.Subscriber('/robot/limb/right/endpnt_state', EndpointState,self._end_point_state_cb)
@@ -92,17 +89,11 @@ class Demonstration(object):
 
     def _initial_setup(self):
 
-        if self._task == "reaching":
-            self.move_to_neutral()
-            # pass
-
+        self.move_to_neutral()
+  
         self._spawn_table()
         rospy.on_shutdown(self._delete_table)
          
-        if self._task == "pih":
-            self.spawn_peg_ft()
-            rospy.on_shutdown(self._delete_peg_ft)
-        
         
 
     def _set_initial_pose_of_eef(self):
@@ -121,20 +112,6 @@ class Demonstration(object):
 
         return pose, point, q
 
-    def _set_initial_peg_pose(self):
-        q = Quaternion()
-        q.x = 0
-        q.y = 0
-        q.z = 0
-        q.w = 1
-
-        point = Point()
-        pose = Pose()
-
-        pose.position = point
-        pose.orientation = q
-
-        return pose, point, q
 
 
     def _spawn_table(self, table_pose=Pose(position=Point(x=0.55, y=0.0, z=0.0)),table_reference_frame="world"):
@@ -175,26 +152,6 @@ class Demonstration(object):
             rospy.logerr("Spawn URDF service call failed: {0}".format(e))
 
 
-    #-------------------------------------------------------------------------------------------#
-    def spawn_peg_ft(self):
-        # peg_ft_pose=Pose(position=Point(x=0.60, y=0.15, z=0.835))
-        peg_ft_pose=Pose(position=Point(x=0.60, y=0.15, z=0.63))
-        # Get Models' Path
-        model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
-        
-        # Load Peg URDF
-        peg_ft_xml = ''
-        with open (model_path + "peg_ft_coarse/peg_ft.urdf", "r") as peg_ft_file:
-            peg_ft_xml=peg_ft_file.read().replace('\n', '')
-
-        # Spawn Peg URDF
-        rospy.wait_for_service('/gazebo/spawn_urdf_model')
-        try:
-            spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
-            resp_urdf = spawn_urdf("peg_ft", peg_ft_xml, "/",
-                                   peg_ft_pose, "world")
-        except rospy.ServiceException, e:
-            rospy.logerr("Spawn URDF service call failed: {0}".format(e))
 #--------------------------------------------------------------------------------------------#
     def spawn_hole(self):
         hole_pose=Pose(position=Point(x=0.60, y=0.05, z=0.630))
@@ -220,13 +177,7 @@ class Demonstration(object):
             resp_delete = delete_model("hole")
         except rospy.ServiceException, e:
             print("Delete Model service call failed: {0}".format(e))
-#---------------------------------------------------------------------------------------------#
-    def _delete_peg_ft(self):
-        try:
-            delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-            resp_delete = delete_model("peg_ft")
-        except rospy.ServiceException, e:
-            print("Delete Model service call failed: {0}".format(e))
+
 #---------------------------------------------------------------------------------------------#
 
     def _delete_table(self):
@@ -282,13 +233,6 @@ class Demonstration(object):
             # print force_obj.Z
             # self.falcon._pub.publish(force_obj)
 
-
-    def _model_states_cb(self, data):
-
-        if data:
-            self._point_peg.x = data.pose[4].position.x 
-            self._point_peg.y = data.pose[4].position.y
-            self._point_peg.z = data.pose[4].position.z 
                  
 
     def move_to_neutral(self):
@@ -348,33 +292,33 @@ class Demonstration(object):
     def falcon_control(self):
         if self.falcon._button == 4:
 
-            if self._task == "reaching":
-                # print round(self.falcon._value_x, 3), " ", round(self.falcon._value_y, 3), " ", round(self.falcon._value_z, 3)
-                self._point.z += round(self.falcon._value_y, 3)/5.0
-                self._point.y += round(self.falcon._value_x, 3)/5.0
+            # if self._task == "reaching":
+            # print round(self.falcon._value_x, 3), " ", round(self.falcon._value_y, 3), " ", round(self.falcon._value_z, 3)
+            self._point.z += round(self.falcon._value_y, 3)/25.0
+            self._point.y += round(self.falcon._value_x, 3)/25.0
 
-                if round(self.falcon._value_z, 3)/5.0 < self.falcon._current_value_z:
-                    self._point.x -= round(self.falcon._value_z, 3)/5.0
-                    # point.x -= abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
-                elif round(self.falcon._value_z, 3)/5.0 > self.falcon._current_value_z:
-                    self._point.x += round(self.falcon._value_z, 3)/5.0
-                    # point.x += abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
+            if round(self.falcon._value_z, 3)/25.0 < self.falcon._current_value_z:
+                self._point.x -= round(self.falcon._value_z, 3)/25.0
+                # point.x -= abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
+            elif round(self.falcon._value_z, 3)/25.0 > self.falcon._current_value_z:
+                self._point.x += round(self.falcon._value_z, 3)/25.0
+                # point.x += abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
 
-                self.falcon._current_value_z = round(self.falcon._value_z, 3)/5.0
-            
-            elif self._task == "pih":
-                # print round(self.falcon._value_x, 3), " ", round(self.falcon._value_y, 3), " ", round(self.falcon._value_z, 3)
-                self._point_peg.z += round(self.falcon._value_y, 3)/500.0
-                self._point_peg.y += round(self.falcon._value_x, 3)/500.0
+            self.falcon._current_value_z = round(self.falcon._value_z, 3)/25.0
+            #########################################################################################
+            # elif self._task == "pih":
+            #     # print round(self.falcon._value_x, 3), " ", round(self.falcon._value_y, 3), " ", round(self.falcon._value_z, 3)
+            #     self._point_peg.z += round(self.falcon._value_y, 3)/500.0
+            #     self._point_peg.y += round(self.falcon._value_x, 3)/500.0
 
-                if round(self.falcon._value_z, 3)/500.0 < self.falcon._current_value_z:
-                    self._point_peg.x -= round(self.falcon._value_z, 3)/500.0
-                    # point.x -= abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
-                elif round(self.falcon._value_z, 3)/500.0 > self.falcon._current_value_z:
-                    self._point_peg.x += round(self.falcon._value_z, 3)/500.0
-                    # point.x += abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
+            #     if round(self.falcon._value_z, 3)/500.0 < self.falcon._current_value_z:
+            #         self._point_peg.x -= round(self.falcon._value_z, 3)/500.0
+            #         # point.x -= abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
+            #     elif round(self.falcon._value_z, 3)/500.0 > self.falcon._current_value_z:
+            #         self._point_peg.x += round(self.falcon._value_z, 3)/500.0
+            #         # point.x += abs(falcon._current_value_z - (round(falcon._value_z, 3)/10.0))
 
-                self.falcon._current_value_z = round(self.falcon._value_z, 3)/500.0
+            #     self.falcon._current_value_z = round(self.falcon._value_z, 3)/500.0
  
 
     def replay(self, file_name):

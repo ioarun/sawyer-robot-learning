@@ -41,7 +41,7 @@
     </collision>
   </link>
   <gazebo reference="peg">
-      <material>Gazebo/Grey</material>
+      <material>Gazebo/Black</material>
       <mu1>1000</mu1>
       <mu2>1000</mu2>
   </gazebo>

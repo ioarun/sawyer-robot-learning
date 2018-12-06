@@ -42,23 +42,8 @@ class PegInHole(object):
     def run(self):
 
         while not rospy.is_shutdown():
-            # do stuffs here
             self.control()
-            model_state = ModelState()
-            model_state.model_name = "peg_ft"
-            model_state.pose = self.demo._pose_peg
-            # twist = Twist()
-            # twist.linear.x = 0.005
-            # twist.linear.y = 0.005
-            # twist.linear.z = 0.005
-            # twist.angular.x = 0
-            # twist.angular.y = 0
-            # twist.angular.z = 0
-            # model_state.twist = twist
-            model_state.reference_frame = "world"
-            
-            # geometry_msgs/Twist twist
-            # string reference_frame
-            # self.set_peg_ft_pose_pub.publish(model_state)
-            # self.rate.sleep()
-
+            if self.demo._limb.ik_request(self.demo._pose) != False:
+                self.demo._limb.set_joint_positions(self.demo._limb.ik_request(self.demo._pose))
+            else:
+                print "IK Request failed."

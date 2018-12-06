@@ -1,0 +1,43 @@
+<robot
+  name="triangle">
+  <link
+    name="triangle">
+    <inertial>
+      <origin
+        xyz="7.8246E-17 -1.34209242057722E-16 0.025"
+        rpy="0 0 0" />
+      <mass
+        value="0.21651" />
+      <inertia
+        ixx="0.000135316469341318"
+        ixy="-4.37294559109886E-19"
+        ixz="6.61744490042419E-21"
+        iyy="0.000135316469341318"
+        iyz="4.75540954157511E-21"
+        izz="0.000180421959121757" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/triangle/triangle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/triangle/triangle.STL" />
+      </geometry>
+    </collision>
+  </link>
+</robot>
