@@ -1,0 +1,43 @@
+<robot
+  name="peg_contact_sensor.SLDPRT">
+  <link
+    name="peg_contact_sensor">
+    <inertial>
+      <origin
+        xyz="0 -3.83327897113899E-19 -0.00125"
+        rpy="0 0 0" />
+      <mass
+        value="0.013607" />
+      <inertia
+        ixx="7.72482045163451E-07"
+        ixy="5.84625110278875E-39"
+        ixz="4.93033843001852E-40"
+        iyy="7.72482045163451E-07"
+        iyz="4.64314435858407E-23"
+        izz="1.53079010784684E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg_contact_sensor/peg_contact_sensor.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg_contact_sensor/peg_contact_sensor.STL" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

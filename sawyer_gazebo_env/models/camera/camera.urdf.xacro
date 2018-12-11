@@ -77,7 +77,7 @@
 
  </gazebo>
 
- <link name="camera3">
+ <!-- <link name="camera3">
   <collision>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <geometry>
@@ -139,7 +139,7 @@
 
   </sensor>
  </gazebo>
-
+ -->
 <!-- <gazebo reference="camera">
     <sensor type="depth" name="openni_camera_camera">       
         <always_on>1</always_on>

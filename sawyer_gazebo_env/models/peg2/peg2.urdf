@@ -1,0 +1,43 @@
+<robot
+  name="peg2.SLDPRT">
+  <link
+    name="peg2">
+    <inertial>
+      <origin
+        xyz="-1.3447E-35 -2.07117068886884E-18 -0.028798"
+        rpy="0 0 0" />
+      <mass
+        value="0.055392" />
+      <inertia
+        ixx="1.95428544266061E-05"
+        ixy="2.05272212220938E-22"
+        ixz="-4.10544424441876E-22"
+        iyy="1.95428544266061E-05"
+        iyz="-4.6395145406224E-22"
+        izz="8.41063081669481E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg2/peg2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://sawyer_gazebo_env/models/peg2/peg2.STL" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

@@ -51,7 +51,7 @@ import scipy.signal as signal
 class Demonstration(object):
     def __init__(self, task):
 
-        self._contact_data_file = open('/home/arun/data.csv', 'w')
+        self._contact_data_file = open('/home/navneet/sawyer_ws/src/sawyer-robot-learning/sawyer_demonstration/scripts/data.csv', 'w')
         self._csv_writer = csv.writer(self._contact_data_file)
         self._csv_writer.writerow(['z'])
 
@@ -131,30 +131,30 @@ class Demonstration(object):
             rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
 
-    def spawn_saucer(_x, _y, saucer_reference_frame="world"):
-        # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
-        saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
-        # Get Models' Path
-        model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
+    # def spawn_saucer(_x, _y, saucer_reference_frame="world"):
+    #     # block_pose=Pose(position=Point(x=0.4225, y=0.1265, z=0.7725))
+    #     saucer_pose=Pose(position=Point(x=_x, y=_y, z=0.825))
+    #     # Get Models' Path
+    #     model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
         
-        # Load Saucer URDF
-        saucer_xml = ''
-        with open (model_path + "plate/plate.urdf", "r") as saucer_file:
-            saucer_xml=saucer_file.read().replace('\n', '')
+    #     # Load Saucer URDF
+    #     saucer_xml = ''
+    #     with open (model_path + "plate/plate.urdf", "r") as saucer_file:
+    #         saucer_xml=saucer_file.read().replace('\n', '')
 
-        # Spawn Saucer URDF
-        rospy.wait_for_service('/gazebo/spawn_urdf_model')
-        try:
-            spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
-            resp_urdf = spawn_urdf("plate", saucer_xml, "/",
-                                   saucer_pose, "world")
-        except rospy.ServiceException, e:
-            rospy.logerr("Spawn URDF service call failed: {0}".format(e))
+    #     # Spawn Saucer URDF
+    #     rospy.wait_for_service('/gazebo/spawn_urdf_model')
+    #     try:
+    #         spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
+    #         resp_urdf = spawn_urdf("plate", saucer_xml, "/",
+    #                                saucer_pose, "world")
+    #     except rospy.ServiceException, e:
+    #         rospy.logerr("Spawn URDF service call failed: {0}".format(e))
 
 
 #--------------------------------------------------------------------------------------------#
     def spawn_hole(self):
-        hole_pose=Pose(position=Point(x=0.60, y=0.05, z=0.630))
+        hole_pose=Pose(position=Point(x=0.60, y=0.0, z=0.630))
         # Get Models' Path
         model_path = rospkg.RosPack().get_path('sawyer_gazebo_env')+"/models/"
         
@@ -206,9 +206,12 @@ class Demonstration(object):
                 self.new_pose = self.falcon._value_y
                 self.collided = True
             # print self.old_pose - self.new_pose
-            diff_force = 1000*(self.old_pose - self.new_pose)
+            diff_force = 800*(self.old_pose - self.new_pose) # Fz = k*dz
             force_obj.Z = diff_force # -ve of -ve force
+            print "Force =", force_obj.Z
             self.new_pose = self.falcon._value_y
+
+
             # if len(self.collision_data_buffer_in) <= 100:
             #     self.collision_data_buffer_in.append(force_obj.Z)
             # else:
